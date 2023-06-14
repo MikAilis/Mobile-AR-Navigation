@@ -10,6 +10,7 @@ public class Net : MonoBehaviour
     [SerializeField] private string[] _subCatalogue = null;
 
     private HttpManager _httpManager;
+    
 
     private void Start()
     {
@@ -18,9 +19,23 @@ public class Net : MonoBehaviour
 
         SendMessage sendMessage = new SMessage();
 
-        _httpManager = new HttpManager(recvMessage);
-
-        SendGetRequest();
+        // SMessage smsg = new SMessage(mapNumber, _offset + _lastIndex);
+        // RMapMessage rmsg = new RMapMessage();
+        // HttpManager httpManager = new HttpManager(rmsg, smsg);
+        // string uri = httpManager.GetParser(NetworkConfig.IP, NetworkConfig.PORT);
+        // StartCoroutine(httpManager.Get(uri));
+        // while (httpManager.Result == NetworkResult.Waiting)
+        // {
+        //     yield return null;
+        // }
+        //
+        // if (httpManager.Result == NetworkResult.Success)
+        // {
+        //     if (rmsg.finish)
+        //     {
+        //         SetEnvironment(rmsg.matrix, _offset++);
+        //     }
+        // }
     }
 
     public void SendGetRequest()
