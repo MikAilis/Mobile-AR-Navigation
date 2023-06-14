@@ -8,6 +8,7 @@ namespace DefaultNamespace
     {
         public Vector3 _orignPosition=new Vector3(0,0,0);
         public Vector3 _currentPosition;
+        public GameObject cube;
 
         void Start()
         {
@@ -25,7 +26,7 @@ namespace DefaultNamespace
         
         private void UpdateOneSecond()
         {
-            GameObject cube = GameObject.Find("MovableObject(Clone)");
+            cube = GameObject.Find("MovableObject(Clone)");
             if (cube != null)
             {
                 _currentPosition = cube.transform.position - _orignPosition;

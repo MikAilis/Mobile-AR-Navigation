@@ -1,4 +1,5 @@
 using System.Collections;
+using DefaultNamespace;
 using LitJson;
 using NetworkTools;
 using UnityEngine;
@@ -10,62 +11,75 @@ public class Net : MonoBehaviour
     [SerializeField] private string[] _subCatalogue = null;
 
     private HttpManager _httpManager;
-    
+    private GameObject m_gameObject;
+
 
     private void Start()
     {
-
-        RecvMessage recvMessage = _httpManager.Data;
-
-        SendMessage sendMessage = new SMessage();
-
-        // SMessage smsg = new SMessage(mapNumber, _offset + _lastIndex);
-        // RMapMessage rmsg = new RMapMessage();
-        // HttpManager httpManager = new HttpManager(rmsg, smsg);
-        // string uri = httpManager.GetParser(NetworkConfig.IP, NetworkConfig.PORT);
-        // StartCoroutine(httpManager.Get(uri));
-        // while (httpManager.Result == NetworkResult.Waiting)
-        // {
-        //     yield return null;
-        // }
-        //
-        // if (httpManager.Result == NetworkResult.Success)
-        // {
-        //     if (rmsg.finish)
-        //     {
-        //         SetEnvironment(rmsg.matrix, _offset++);
-        //     }
-        // }
+        SendGetRequest();
+        SendSaveRequest();
     }
 
-    public void SendGetRequest()
+    public IEnumerator SendGetRequest()
     {
+        SMessage smsg = new SMessage("GET_OBJECT",GetComponent<Position>().cube.name,GetComponent<Position>()._currentPosition,
+            Quaternion.Euler(GetComponent<Position>().cube.transform.rotation.eulerAngles) * Vector3.forward,
+            GetComponent<Position>().cube.transform.localScale);
+        RMessage rmsg = new RMessage();
+        _httpManager = new HttpManager(rmsg, smsg);
         // Get the URI for the GET request
         string uri = _httpManager.GetParser(_serverIp, _serverPort, _subCatalogue);
         
-        StartCoroutine(SendGetRequestCoroutine(uri));
-    }
-
-    private IEnumerator SendGetRequestCoroutine(string uri)
-    {
-        yield return _httpManager.Get(uri);
-
-        // Check the result of the GET request
-        switch (_httpManager.Result)
+        StartCoroutine(_httpManager.Get(uri));
+        while (_httpManager.Result == NetworkResult.Waiting)
         {
-            case NetworkResult.Success:
-                Debug.Log("GET request succeeded!");
-              
-                RecvMessage recvMessage = _httpManager.Data;
-                JsonData jsonData = _httpManager.JsonData;
-                byte[] rawData = _httpManager.RawData;
-                break;
-            default:
-                Debug.Log($"GET request failed with error: {_httpManager.Result.ToString()}");
-                break;
+            yield return null;
         }
         
-        _httpManager.Clear();
+        if (_httpManager.Result == NetworkResult.Success)
+        {
+            Debug.Log("update success!");
+            //todo: create a new object
+            GameObject cube = GameObject.Find("MovableObject(Clone)");
+            if (cube==null)
+            {
+                cube = Instantiate(m_gameObject, rmsg.prefabs[0].position, rmsg.prefabs[0].rotation);
+            }
+            else
+            {
+                if (rmsg.prefabs.Count>0)
+                {
+                    cube.transform.position = rmsg.prefabs[0].position;
+                }
+                else
+                {
+                    Destroy(cube);
+                    cube = null;
+                }
+            }
+        }
     }
-    
+    public IEnumerator SendSaveRequest()
+    {
+        SMessage smsg = new SMessage("SAVE_OBJECT",GetComponent<Position>().cube.name,GetComponent<Position>()._currentPosition,
+            Quaternion.Euler(GetComponent<Position>().cube.transform.rotation.eulerAngles) * Vector3.forward,
+            GetComponent<Position>().cube.transform.localScale);
+        
+        RMessage rmsg = new RMessage();
+        _httpManager = new HttpManager(rmsg, smsg);
+        // Get the URI for the GET request
+        string uri = _httpManager.GetParser(_serverIp, _serverPort, _subCatalogue);
+        
+        StartCoroutine(_httpManager.Get(uri));
+        while (_httpManager.Result == NetworkResult.Waiting)
+        {
+            yield return null;
+        }
+        
+        if (_httpManager.Result == NetworkResult.Success)
+        {
+            Debug.Log("Save success!");
+        }
+    }
+
 }

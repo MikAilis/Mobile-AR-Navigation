@@ -11,21 +11,25 @@ namespace NetworkTools
     public class RMessage : RecvMessage
     {
         public string RESPOND;
-        public List<GameObject> prefabs;
+        public List<prefab> prefabs;
+        
         
 
 
         public override void SetJsonData(JsonData data)
         {
             RESPOND = data["RESPOND"].ToString();
+  
             for (int i = 0; i < data["prefabs"].Count; i++)
             {
-                GameObject newPrefab = Object.Instantiate<GameObject>(new GameObject());
+                prefabs.Clear();
+                prefab newPrefab = new prefab();
                 newPrefab.name = data["prefabs"][i]["prefab_name"].ToString();
-                newPrefab.transform.position = String2Vector(data["prefabs"][i]["position"].ToString());
-                newPrefab.transform.rotation = Quaternion.Euler(String2Vector(data["prefabs"][i]["rotation"].ToString()));
-                newPrefab.transform.localScale = String2Vector(data["prefabs"][i]["scale"].ToString());
+                newPrefab.position = String2Vector(data["prefabs"][i]["position"].ToString());
+                newPrefab.rotation = Quaternion.Euler(String2Vector(data["prefabs"][i]["rotation"].ToString()));
+                newPrefab.scale = String2Vector(data["prefabs"][i]["scale"].ToString());
                 prefabs.Add(newPrefab);
+                
             }
             throw new System.NotImplementedException();
         }
